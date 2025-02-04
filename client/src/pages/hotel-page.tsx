@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   Loader2, 
   Wifi, 
-  Pool, 
+  Waves, 
   Utensils, 
   Car, 
   Dumbbell, 
@@ -24,7 +24,7 @@ import { DateRange } from "react-day-picker";
 
 const AMENITY_ICONS: Record<string, any> = {
   "WiFi": Wifi,
-  "Pool": Pool,
+  "Pool": Waves,
   "Restaurant": Utensils,
   "Parking": Car,
   "Gym": Dumbbell,
