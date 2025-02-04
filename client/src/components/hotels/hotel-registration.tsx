@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -39,10 +39,14 @@ const AVAILABLE_AMENITIES = [
   "Business Center",
 ] as const;
 
-// Extend the insertHotelSchema to include array types
+// Update the insertHotelSchema to include array types
 const formSchema = insertHotelSchema.extend({
   images: z.array(z.string()).min(1, "At least one property image is required"),
   amenities: z.array(z.enum(AVAILABLE_AMENITIES)).min(1, "Select at least one amenity"),
+  virtualTours: z.array(z.object({
+    url: z.string().url("Please enter a valid virtual tour URL"),
+    title: z.string().min(1, "Title is required"),
+  })),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -101,6 +105,21 @@ export function HotelRegistration() {
 
     const currentImages = form.getValues("images");
     form.setValue("images", [...currentImages, ...imageUrls], { shouldValidate: true });
+  };
+
+  const handleAddVirtualTour = () => {
+    const currentTours = form.getValues("virtualTours") || [];
+    form.setValue("virtualTours", [
+      ...currentTours,
+      { url: "", title: "" },
+    ]);
+  };
+
+  const handleRemoveVirtualTour = (index: number) => {
+    const currentTours = form.getValues("virtualTours") || [];
+    const newTours = [...currentTours];
+    newTours.splice(index, 1);
+    form.setValue("virtualTours", newTours);
   };
 
   return (
@@ -163,6 +182,73 @@ export function HotelRegistration() {
                 </FormItem>
               )}
             />
+
+            {/* Added Virtual Tours FormField */}
+            <FormField
+              control={form.control}
+              name="virtualTours"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Virtual Tours</FormLabel>
+                  <FormDescription className="text-muted-foreground mb-4">
+                    Add 360-degree virtual tours of your property
+                  </FormDescription>
+                  <FormControl>
+                    <div className="space-y-4">
+                      {(field.value || []).map((tour, index) => (
+                        <div key={index} className="flex gap-4 items-start">
+                          <div className="flex-1 space-y-4">
+                            <Input
+                              placeholder="Tour Title (e.g., 'Master Bedroom Tour')"
+                              value={tour.title}
+                              onChange={(e) => {
+                                const newTours = [...field.value];
+                                newTours[index] = {
+                                  ...newTours[index],
+                                  title: e.target.value,
+                                };
+                                form.setValue("virtualTours", newTours);
+                              }}
+                            />
+                            <Input
+                              placeholder="Virtual Tour URL (from Matterport, etc.)"
+                              value={tour.url}
+                              onChange={(e) => {
+                                const newTours = [...field.value];
+                                newTours[index] = {
+                                  ...newTours[index],
+                                  url: e.target.value,
+                                };
+                                form.setValue("virtualTours", newTours);
+                              }}
+                            />
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            type="button"
+                            onClick={() => handleRemoveVirtualTour(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddVirtualTour}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Virtual Tour
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
 
             <FormField
               control={form.control}
