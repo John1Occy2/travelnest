@@ -1,14 +1,14 @@
 import { Hotel } from "@shared/schema";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 
 interface HotelCardProps {
   hotel: Hotel;
 }
 
 export function HotelCard({ hotel }: HotelCardProps) {
-  const navigate = useNavigate();
+  const [_, setLocation] = useLocation();
 
   return (
     <Card className="overflow-hidden">
@@ -34,7 +34,7 @@ export function HotelCard({ hotel }: HotelCardProps) {
         <Button 
           variant="default" 
           className="w-full"
-          onClick={() => navigate(`/hotels/${hotel.id}`)}
+          onClick={() => setLocation(`/hotels/${hotel.id}`)}
         >
           View Details
         </Button>
