@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/ui/navbar";
 import HomePage from "@/pages/home-page";
 import HotelPage from "@/pages/hotel-page";
+import SearchPage from "@/pages/search-page";
 import DashboardPage from "@/pages/dashboard-page";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
@@ -19,6 +20,7 @@ function Router() {
         <Switch>
           <Route path="/" component={HomePage} />
           <Route path="/hotels/:id" component={HotelPage} />
+          <Route path="/search" component={SearchPage} />
           <ProtectedRoute path="/dashboard" component={DashboardPage} />
           <Route path="/auth" component={AuthPage} />
           <Route component={NotFound} />
