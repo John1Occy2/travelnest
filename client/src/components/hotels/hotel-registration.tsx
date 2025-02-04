@@ -41,8 +41,8 @@ const AVAILABLE_AMENITIES = [
 
 // Extend the insertHotelSchema to include array types
 const formSchema = insertHotelSchema.extend({
-  images: z.array(z.string()).default([]),
-  amenities: z.array(z.enum(AVAILABLE_AMENITIES)).default([]),
+  images: z.array(z.string()).min(1, "At least one property image is required"),
+  amenities: z.array(z.enum(AVAILABLE_AMENITIES)).min(1, "Select at least one amenity"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -82,6 +82,8 @@ export function HotelRegistration() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
     const imageUrls = await Promise.all(
       files.map((file) => {
         return new Promise<string>((resolve) => {
@@ -102,7 +104,7 @@ export function HotelRegistration() {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full max-w-4xl mx-auto bg-white/50 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center mb-2">
           List Your Property
@@ -120,7 +122,7 @@ export function HotelRegistration() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hotel Name</FormLabel>
+                    <FormLabel>Hotel Name <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Enter hotel name" {...field} />
                     </FormControl>
@@ -134,7 +136,7 @@ export function HotelRegistration() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel>Address <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Enter hotel address" {...field} />
                     </FormControl>
@@ -149,7 +151,7 @@ export function HotelRegistration() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe your property"
@@ -167,19 +169,35 @@ export function HotelRegistration() {
               name="images"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property Images</FormLabel>
+                  <FormLabel>Property Images <span className="text-red-500">*</span></FormLabel>
+                  <FormDescription className="text-muted-foreground mb-4">
+                    Upload high-quality images of your property (required)
+                  </FormDescription>
                   <FormControl>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {field.value.map((url, index) => (
                         <div
                           key={index}
-                          className="relative aspect-video rounded-lg overflow-hidden"
+                          className="relative aspect-video rounded-lg overflow-hidden group"
                         >
                           <img
                             src={url}
                             alt={`Property ${index + 1}`}
                             className="w-full h-full object-cover"
                           />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const newImages = [...field.value];
+                                newImages.splice(index, 1);
+                                form.setValue("images", newImages, { shouldValidate: true });
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
                         </div>
                       ))}
                       <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed rounded-lg p-4 hover:bg-accent/50 cursor-pointer transition-colors">
@@ -197,9 +215,6 @@ export function HotelRegistration() {
                       </label>
                     </div>
                   </FormControl>
-                  <FormDescription>
-                    Upload high-quality images of your property
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -210,9 +225,12 @@ export function HotelRegistration() {
               name="amenities"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amenities</FormLabel>
+                  <FormLabel>Amenities <span className="text-red-500">*</span></FormLabel>
+                  <FormDescription className="text-muted-foreground mb-4">
+                    Select all amenities available at your property (at least one required)
+                  </FormDescription>
                   <FormControl>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                       {AVAILABLE_AMENITIES.map((amenity) => {
                         const isSelected = field.value.includes(amenity);
                         return (
@@ -220,7 +238,7 @@ export function HotelRegistration() {
                             key={amenity}
                             variant={isSelected ? "default" : "outline"}
                             className={cn(
-                              "cursor-pointer transition-colors",
+                              "cursor-pointer transition-colors py-3",
                               isSelected
                                 ? "bg-primary hover:bg-primary/80"
                                 : "hover:bg-accent"
@@ -240,9 +258,6 @@ export function HotelRegistration() {
                       })}
                     </div>
                   </FormControl>
-                  <FormDescription>
-                    Select all amenities available at your property
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
